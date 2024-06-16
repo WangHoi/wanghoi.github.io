@@ -22,6 +22,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    env:
+      MDBOOK_VERSION: '0.4.12'
+      MDBOOK_LINKCHECK_VERSION: '0.7.4'
+      MDBOOK_MERMAID_VERSION: '0.8.3'
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Install mdbook
+      run: |
+        mkdir ~/tools
+        curl -L https://github.com/rust-lang/mdBook/releases/download/v$MDBOOK_VERSION/mdbook-v$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
+        curl -L https://github.com/badboy/mdbook-mermaid/releases/download/v$MDBOOK_MERMAID_VERSION/mdbook-mermaid-v$MDBOOK_MERMAID_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
+        curl -L https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/download/v$MDBOOK_LINKCHECK_VERSION/mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -O
+        unzip mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -d ~/tools
+        chmod +x ~/tools/mdbook-linkcheck
+        curl -s https://api.github.com/repos/zjp-CN/mdbook-theme/releases/latest \
+               | grep browser_download_url \
+               | grep mdbook-theme_linux \
+               | cut -d '"' -f 4 \
+               | wget -qi -
+        tar -xzf mdbook-theme_linux.tar.gz -C ~/tools
+        echo ~/tools >> $GITHUB_PATH
+    - name: Build
+      run: mdbook build kwui
+    # share between different jobs
+    - uses: actions/upload-artifact@v3
+      with:
+        name: kwui_book
+        path: kwui/book/
   # Single deploy job since we're just deploying
   deploy:
     environment:
@@ -29,16 +62,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      # actions/download-artifact@v3 does not allow sharing across workflows
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: book
-          path: book/
-          workflow: build.yml
+          name: kwui_book
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
