@@ -1,0 +1,6 @@
+[book]
+authors = ["wanghoi"]
+language = "en"
+multilingual = false
+src = "src"
+title = "kwui Documentation"
