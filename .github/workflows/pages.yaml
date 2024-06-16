@@ -26,7 +26,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     env:
-      MDBOOK_VERSION: '0.4.12'
+      MDBOOK_VERSION: '0.4.40'
       MDBOOK_LINKCHECK_VERSION: '0.7.4'
       MDBOOK_MERMAID_VERSION: '0.8.3'
     steps:
