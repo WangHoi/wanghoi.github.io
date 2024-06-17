@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: kwui_book
-          path: book/
+          path: book/kwui/
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
