@@ -62,6 +62,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - name: Create dir
+        run: |
+          mkdir -p book/kwui
       - name: Download artifact
         id: download-artifact
         uses: actions/download-artifact@v4
