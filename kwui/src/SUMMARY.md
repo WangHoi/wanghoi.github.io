@@ -9,5 +9,6 @@
     - [JavaScript Component Hooks](./authoring/hooks.md)
     - [Rust and JavaScript Interop](./authoring/rust.md)
     - [CSS in kwui](./authoring/css.md)
-- [Gallery]()
-- [Common Questions]()
+- [Android Support](./android_support.md)
+- [Gallery](./gallery.md)
+- [Common Questions](./faq.md)
