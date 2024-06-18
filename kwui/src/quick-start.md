@@ -32,7 +32,7 @@ Let's create a hello world project `my_proj`:
 2. Build the project for Android.
     ```
     # Build 'app-debug.apk'
-    kwui build --apk
+    kwui build apk
     ```
 3. Install the resulting APK to your phone.
     > NOTE: only supports `arm64-v8a` abi now.
