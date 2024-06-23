@@ -29,10 +29,12 @@ Let's create a hello world project `my_proj`:
 >
 > **kwui** is using prebuilt library to accelerate the build process. 
 > 
-> If you are in a country where access to GitHub is difficult or slow,
-> set the following environment variable:
-> - KWUI_BINARIES_URL=https://gitee.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-binaries-{key}.tar.gz
-> - KWUI_TEMPLATES_URL=https://gitee.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-templates-{key}.tar.gz
+> If your access to GitHub is difficult or slow,
+> set the environment variable to use a mirror:
+> ```bash
+> KWUI_BINARIES_URL=https://gitee.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-binaries-{key}.tar.gz
+> KWUI_TEMPLATES_URL=https://gitee.com/wanghoi/kwui-binaries/releases/download/{tag}/kwui-templates-{key}.tar.gz
+> ```
 
 ## Porting to Android
 
