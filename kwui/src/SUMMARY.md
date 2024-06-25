@@ -12,3 +12,7 @@
 - [Android Support](./android_support.md)
 - [Gallery](./gallery.md)
 - [Common Questions](./faq.md)
+
+- [Advanced Topics]()
+    - [QuickJS VM](./advanced/quickjs_vm.md)
+        - [QuickJS Opcodes](./advanced/quickjs_opcode.md)
