@@ -7,7 +7,7 @@ We are compiling QuickJS with:
 
 ```cpp
 // #undef CONFIG_BIGNUM
-#define CONFIG_DEBUGGER 1
+// #undef CONFIG_DEBUGGER
 #define SHORT_OPCODES 1
 ```
 
@@ -91,7 +91,7 @@ Typical operand types:
 2B      | check_ctor        |                   | `.` => `.`                        | check calling function's argument, `JSCallInternal(new_target)`, check `new_target` != `undefined`, class constructors must be invoked with 'new' 
 2C      | check_brand       |                   | `func, obj` => `func, obj`        | check home object of `func` and `obj` has same brand, if failed, exception returned to the caller to `JS_CallInternal()`
 2D      | add_brand         |                   | `home_obj, obj` => `.`            | add a brand property to `object`, which points to the brand of `home_obj`
-2E      | return_async      |                   | `.` => `.`                        | save VM stack execution state, return `undefined` to the caller of `JS_CallInternal()` 
+2E      | return_async      |                   | `.` => `.`                        | save VM execution state, return `undefined` to the caller of `JS_CallInternal()` 
 2F      | throw             |                   | `except_obj` => `.`               | take off the exception object from stack, set it as VM's current_exception 
 30      | throw_error       | 4:atom, 1:type    | `.` => `.`                        | throw an exception with type and error message atom
 31      | eval              | 2:argc, 2:scope   | `eval_func, args...` => `func_ret` | take off the `eval` function object and its argments from stack, call function, push function's return value to the stack
@@ -143,22 +143,87 @@ Typical operand types:
 5F      | put_var_ref       | 2:index           | `a` => `.`                        | set variable reference, `var_refs[index] = a`
 60      | set_var_ref       | 2:index           | `a` => `a`                        | set variable reference, `var_refs[index] = a`
 61      | set_loc_uninitialized | 2:index       | `.` => `.`                        | set local variable to `JS_UNINITIALIZED`, `var_buf[index] = uninitialized`
-62      | get_loc_check|                   | `` => ``           | TBD
-63      | put_loc_check|                   | `` => ``           | TBD
-64      | put_loc_check_init|                   | `` => ``           | TBD
-65      | get_var_ref_check|                   | `` => ``           | TBD
-66      | put_var_ref_check|                   | `` => ``           | TBD
-67      | put_var_ref_check_init|                   | `` => ``           | TBD
-68      | close_loc|                   | `` => ``           | TBD
-69      | if_false|                   | `` => ``           | TBD
-6A      | if_true|                   | `` => ``           | TBD
-6B      | goto|                   | `` => ``           | TBD
-6C      | catch|                   | `` => ``           | TBD
-6D      | gosub|                   | `` => ``           | TBD
-6E      | ret|                   | `` => ``           | TBD
-6F      | to_object|                   | `` => ``           | TBD
-70      | to_propkey|                   | `` => ``           | TBD
-71      | to_propkey2|                   | `` => ``           | TBD
+62      | get_loc_check     | 2:index           | `.` => `a`                        | `get_loc` with check for `var_buf[index] != JS_UNINITIALIZED`
+63      | put_loc_check     | 2:index           | `a` => `.`                        | `put_loc` with check for `var_buf[index] != JS_UNINITIALIZED`
+64      | put_loc_check_init | 2:index          | `a` => `.`                        | `put_loc` with check for `var_buf[index] == JS_UNINITIALIZED`
+65      | get_var_ref_check | 2:index           | `.` => `a`                        | `get_var_ref` with check for `var_refs[index] != JS_UNINITIALIZED`
+66      | put_var_ref_check | 2:index           | `a` => `.`                        | `put_var_ref` with check for `var_refs[index] != JS_UNINITIALIZED`
+67      | put_var_ref_check_init | 2:index      | `a` => `a`                        | `put_var_ref` with check for `var_refs[index] == JS_UNINITIALIZED`
+68      | close_loc         | 2:index           | `.` => `.`                        | when leave scope, check to detach current stack frame's variable
+69      | if_false          | 4:label           | `cond` => `.`                     | offset current instruction pointer if false, `if (!cond) pc += label`
+6A      | if_true           | 4:label           | `cond` => `.`                     | offset current instruction pointer if true, `if (cond) pc += label`
+6B      | goto              | 4:label           | `.` => `.`                        | offset current instruction pointer, `pc += label`
+6C      | catch             | 4:label           | `.` => `catch_offset`             | push a catch_offset JSValue to stack, `label` is the offset from the start of current function's byte_code_buf
+6D      | gosub             | 4:label           | `.` => `catch_offset`             | push a catch_offset JSValue to stack, `label` is the offset from the start of current function's byte_code_buf, and offset current instruction pointer, `pc += label`, used to execute the finally block
+6E      | ret               |                   | `label` => `.`                    | set current instruction pointer, `pc = byte_code_buf + label`, used to return from the finally block
+6F      | to_object         |                   | `a` => `obj_a`                    | convert top to stack to object
+70      | to_propkey        |                   | `a` => `propkey_a`                | convert top to stack to property key, aka int, string, or symbol
+71      | to_propkey2       |                   | `a, obj` => `propkey_a, obj`      | test `obj != undefined && obj != null`, convert top to stack to property key, aka int, string, or symbol
+72      | with_get_var      | 4:atom, 4:label, 1:is_with | `obj` => `new_obj`       | replace stack top with `obj[atom]`, offset current instruction pointer, `pc += label - 5`
+73      | with_put_var      | 4:atom, 4:label, 1:is_with | `obj, a` => `.`          | set object property, `obj[atom] = a`, offset current instruction pointer, `pc += label - 5`
+74      | with_delete_var   | 4:atom, 4:label, 1:is_with | `obj` => `success`       | delete object property, and push the delete status to stack, offset current instruction pointer, `pc += label - 5`
+75      | with_make_ref     | 4:atom, 4:label, 1:is_with | `obj` => `atom, obj`     | push the property name to stack, offset current instruction pointer, `pc += label - 5`
+76      | with_get_ref      | 4:atom, 4:label, 1:is_with | `obj` => `a, obj`        | get object property, `a = obj[atom]`, offset current instruction pointer, `pc += label - 5`
+77      | with_get_ref_undef | 4:atom, 4:label, 1:is_with | `obj` => `a, undefined` | get object property, `a = obj[atom]`, set old stack top to `undefined`, offset current instruction pointer, `pc += label - 5`
+78      | make_loc_ref      | 4:atom, 2:index   | `.` => `obj`                      | make a new object, and a new local variable reference, set `object[atom] = get_var_ref(index)`
+79      | make_arg_ref      | 4:atom, 2:index   | `.` => `obj`                      | make a new object, and a new function argument reference, set `object[atom] = get_var_ref(index)`
+7A      | make_var_ref_ref  | 4:atom, 2:index   | `.` => `obj`                      | make a new object, and a free variable reference, set `object[atom] = var_refs[index]`
+7B      | make_var_ref      | 4:atom            | `.` => `atom, global_obj`         | construct a reference to a global variable
+7C      | for_in_start      |                   | `obj` => `enum_obj`               | construct `for in` iterator from object
+7D      | for_of_start      |                   | `obj` => `catch_offset, method, enum_obj` | construct `for of` iterator from object
+7E      | for_await_of_start |                  | `obj` => `catch_offset, method, enum_obj` | construct `for await of` iterator from object
+7F      | for_in_next       |                   | `enum_obj` => `done, value, enum_obj` | iterator to the next value
+80      | for_of_next       | 1:index           | `catch_offset, method, enum_obj` => `done, value, catch_offset, method, enum_obj` | iterator to the next value
+81      | iterator_check_object |               | `iter_ret` => `iter_ret`          | check iterator must return an object
+82      | iterator_get_value_done |             | `iter_ret` => `done, comp_val`    | check iterator must return an object, fetch the iterator complete value, and iterator done state
+83      | iterator_close    |                   | `catch_offset, method, enum_obj` => `.` | finalize iterator and cleanup
+84      | iterator_close_return |               | `ret_val, ..., catch_offset, method, enum_obj` => `catch_offset, method, enum_obj, ret_val` | finalize iterator and cleanup
+85      | iterator_next     |                   | `a, catch_offset, method, enum_obj` => `b, catch_offset, method, enum_obj` | call iterator next method, `b = iter_obj.method(a)`
+86      | iterator_call     | 1:flags           | `a, catch_offset, method, enum_obj` => `ret_flag, b, catch_offset, method, enum_obj` | call iterator next method, `b = iter_obj.method(a)`, set `ret_flag` in accordance with `flags`
+87      | initial_yield     |                   | `.` => `.`                        | save VM execution state, return `undefined` to the caller of `JS_CallInternal()` 
+88      | yield             |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_YIELD` to the caller of `JS_CallInternal()` 
+89      | yield_star        |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_YIELD_STAR` to the caller of `JS_CallInternal()` 
+8A      | async_yield_star  |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_YIELD_STAR` to the caller of `JS_CallInternal()` 
+8B      | await             |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_AWAIT` to the caller of `JS_CallInternal()` 
+72      | neg |                   | `` => ``      | TBD
+72      | plus |                   | `` => ``      | TBD
+72      | dec |                   | `` => ``      | TBD
+72      | inc |                   | `` => ``      | TBD
+72      | post_dec |                   | `` => ``      | TBD
+72      | post_inc |                   | `` => ``      | TBD
+72      | dec_loc |                   | `` => ``      | TBD
+72      | inc_loc |                   | `` => ``      | TBD
+72      | add_loc |                   | `` => ``      | TBD
+72      | not |                   | `` => ``      | TBD
+72      | lnot |                   | `` => ``      | TBD
+72      | typeof |                   | `` => ``      | TBD
+72      | delete |                   | `` => ``      | TBD
+72      | delete_var |                   | `` => ``      | TBD
+72      | mul |                   | `` => ``      | TBD
+72      | div |                   | `` => ``      | TBD
+72      | mod |                   | `` => ``      | TBD
+72      | add |                   | `` => ``      | TBD
+72      | sub |                   | `` => ``      | TBD
+72      | pow |                   | `` => ``      | TBD
+72      | shl |                   | `` => ``      | TBD
+72      | sar |                   | `` => ``      | TBD
+72      | shr |                   | `` => ``      | TBD
+72      | lt |                   | `` => ``      | TBD
+72      | lte |                   | `` => ``      | TBD
+72      | gt |                   | `` => ``      | TBD
+72      | gte |                   | `` => ``      | TBD
+72      | instanceof |                   | `` => ``      | TBD
+72      | in |                   | `` => ``      | TBD
+72      | eq |                   | `` => ``      | TBD
+72      | neq |                   | `` => ``      | TBD
+72      | strict_eq |                   | `` => ``      | TBD
+72      | strict_neq |                   | `` => ``      | TBD
+72      | and |                   | `` => ``      | TBD
+72      | xor |                   | `` => ``      | TBD
+72      | or |                   | `` => ``      | TBD
+72      | is_undefined_or_null |                   | `` => ``      | TBD
+72      | nop |                   | `` => ``      | TBD
+
 
 
 
