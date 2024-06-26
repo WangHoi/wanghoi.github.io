@@ -94,5 +94,72 @@ Typical operand types:
 2E      | return_async      |                   | `.` => `.`                        | save VM stack execution state, return `undefined` to the caller of `JS_CallInternal()` 
 2F      | throw             |                   | `except_obj` => `.`               | take off the exception object from stack, set it as VM's current_exception 
 30      | throw_error       | 4:atom, 1:type    | `.` => `.`                        | throw an exception with type and error message atom
+31      | eval              | 2:argc, 2:scope   | `eval_func, args...` => `func_ret` | take off the `eval` function object and its argments from stack, call function, push function's return value to the stack
+32      | apply_eval        | 2:scope           | `array[args], eval_func_obj` => `func_ret` | take off the `eval` function object and its argments from stack, call function, push function's return value to the stack
+33      | regex             |                   | `bytecode, pattern` => `regexp_obj` | construct regular expression object from regexp bytecode and match pattern, push to the stack
+34      | get_super         |                   | `obj` => `obj_super`              | get object's prototype type object, replace top stack value
+35      | import            |                   | `specifier` => `module`           | dynamic module import
+36      | check_var         | 4:atom            | `.` => `var_exists`               | check if a global variable exists
+37      | get_var_undef     | 4:atom            | `.` => `a`                        | get global variable and push to the stack, push `undefined` if variable not exists
+38      | get_var           | 4:atom            | `.` => `a`                        | get global variable and push to the stack, throw if variable not exists
+39      | put_var           | 4:atom            | `a` => `.`                        | set global variable from stack stop, normal variable write, if variable not exist, throw 
+3A      | put_var_init      | 4:atom            | `a` => `.`                        | set global variable from stack stop, if variable not exist, initialize lexical variable, 
+3B      | put_var_strict    | 4:atom            | `a, strict` => `.`                | set global variable from stack stop, if `strict` is true, throw if variable not exists, else normal variable write
+3C      | get_ref_value     |                   | `prop, this` => `this[prop]`      | get object's property
+3D      | put_ref_value     |                   | `a, prop, this` => `.`            | set object's property, `this[prop] = a`, if `is_strict_mode()`, throw if property not exists
+3E      | define_var        | 4:atom, 1:flags   | `.` => ``                         | define global variable
+3F      | check_define_var  | 4:atom, 1:flags   | `.` => `.`                        | check global variable re-declaration, flags is 0, DEFINE_GLOBAL_LEX_VAR or DEFINE_GLOBAL_FUNC_VAR
+40      | define_func       | 4:atom, 1:flags   | `func_obj` => `.`                 | define global function
+41      | get_field         | 4:atom            | `this` => `a`                     | pop `this` object, `push this[prop]` to the stack
+42      | get_field2        | 4:atom            | `this` => `a, this`               | push `this[prop]` to the stack
+43      | put_field         | 4:atom            | `a, this` => `.`                  | set object property, `this[prop] = a`
+44      | get_private_field |                   | `name, obj` => `a`                | get object private property
+45      | put_private_field |                   | `name, a, obj` => `.`             | set object private property, `obj[name] = a`
+46      | define_private_field |                | `a, name, obj` => `.`             | set object private property, `obj[name] = a`
+47      | get_array_el      |                   | `prop, this` => `a`               | get array element, `a = this[prop]`
+48      | get_array_el2     |                   | `prop, this` => `a, this`         | get array element, `a = this[prop]`
+49      | put_array_el      |                   | `a, prop, this` => `.`            | set array element, `this[prop] = a`
+4A      | get_super_value   |                   | `prop, obj, this` => `a`          | get object property, `Reflect.get(obj, prop, this)`, the value of `this` provided for the `obj` if a getter is encountered
+4B      | put_super_value   |                   | `a, prop, obj, this` => `.`       | set object property, `Reflect.set(obj, prop, a, this)`, the value of `this` provided for the `obj` if a setter is encountered
+4C      | define_field      | 4:atom            | `a, this` => `this`               | define object property, `this[atom] = a`
+4D      | set_name          | 4:atom            | `obj` => `obj`                    | set the name of object
+4E      | set_name_computed |                   | `obj, name` => `obj, name`        | set the name of object
+4F      | set_proto         |                   | `proto, obj` => `obj`      | set the prototype of object
+50      | set_home_object   |                   | `func_obj, home_obj` => `func_obj, home_obj` | set the home object of function
+51      | define_array_el   |                   | `a, prop, this` => `prop, this`   | define array element, `this[prop] = a`
+52      | append            |                   | `enum_obj, pos, array` => `pos, array` | append to array, `array[pos++] = a`
+53      | copy_data_properties | 1:mask         | `.` => `.`                        | copy properties value from source to target object, stack offsets encoded in `mask`: 2 bits for target, 3 bits for source, 2 bits for exclusionList
+54      | define_method     | 4:atom, 1:flags   | `a, obj` => `obj`                 | define object method, `obj[atom] = a`
+55      | define_method_computed | 1:flags      | `a, atom, obj` => `obj`           | define object method with computed method name, `obj[atom] = a`, must come after `define_method`
+56      | define_class      | 4:atom, 1:flags   | `class_ctor, parent` => `proto, ctor` | define a class object
+57      | define_class_computed | 4:atom, 1:flags | `class_ctor, parent, name` => `proto, ctor` | define a class object with computed class name 
+58      | get_loc           | 2:index           | `.` => `a`                        | push local variable `var_buf[index]` to the stack
+59      | put_loc           | 2:index           | `a` => `.`                        | set local variable, `var_buf[index] = a`
+5A      | set_loc           | 2:index           | `a` => `a`                        | set local variable, `var_buf[index] = a`
+5B      | get_arg           | 2:index           | `.` => `a`                        | push function argument `arg_buf[index]` to the stack
+5C      | put_arg           | 2:index           | `a` => `.`                        | set function argument, `arg_buf[index] = a`
+5D      | set_arg           | 2:index           | `a` => `a`                        | set function argument, `arg_buf[index] = a`
+5E      | get_var_ref       | 2:index           | `.` => `a`                        | push variable reference `var_refs[index]` to the stack
+5F      | put_var_ref       | 2:index           | `a` => `.`                        | set variable reference, `var_refs[index] = a`
+60      | set_var_ref       | 2:index           | `a` => `a`                        | set variable reference, `var_refs[index] = a`
+61      | set_loc_uninitialized | 2:index       | `.` => `.`                        | set local variable to `JS_UNINITIALIZED`, `var_buf[index] = uninitialized`
+62      | get_loc_check|                   | `` => ``           | TBD
+63      | put_loc_check|                   | `` => ``           | TBD
+64      | put_loc_check_init|                   | `` => ``           | TBD
+65      | get_var_ref_check|                   | `` => ``           | TBD
+66      | put_var_ref_check|                   | `` => ``           | TBD
+67      | put_var_ref_check_init|                   | `` => ``           | TBD
+68      | close_loc|                   | `` => ``           | TBD
+69      | if_false|                   | `` => ``           | TBD
+6A      | if_true|                   | `` => ``           | TBD
+6B      | goto|                   | `` => ``           | TBD
+6C      | catch|                   | `` => ``           | TBD
+6D      | gosub|                   | `` => ``           | TBD
+6E      | ret|                   | `` => ``           | TBD
+6F      | to_object|                   | `` => ``           | TBD
+70      | to_propkey|                   | `` => ``           | TBD
+71      | to_propkey2|                   | `` => ``           | TBD
+
+
 
 TBD...
