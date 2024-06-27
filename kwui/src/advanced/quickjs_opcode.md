@@ -185,46 +185,125 @@ Typical operand types:
 89      | yield_star        |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_YIELD_STAR` to the caller of `JS_CallInternal()` 
 8A      | async_yield_star  |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_YIELD_STAR` to the caller of `JS_CallInternal()` 
 8B      | await             |                   | `.` => `.`                        | save VM execution state, return `FUNC_RET_AWAIT` to the caller of `JS_CallInternal()` 
-72      | neg |                   | `` => ``      | TBD
-72      | plus |                   | `` => ``      | TBD
-72      | dec |                   | `` => ``      | TBD
-72      | inc |                   | `` => ``      | TBD
-72      | post_dec |                   | `` => ``      | TBD
-72      | post_inc |                   | `` => ``      | TBD
-72      | dec_loc |                   | `` => ``      | TBD
-72      | inc_loc |                   | `` => ``      | TBD
-72      | add_loc |                   | `` => ``      | TBD
-72      | not |                   | `` => ``      | TBD
-72      | lnot |                   | `` => ``      | TBD
-72      | typeof |                   | `` => ``      | TBD
-72      | delete |                   | `` => ``      | TBD
-72      | delete_var |                   | `` => ``      | TBD
-72      | mul |                   | `` => ``      | TBD
-72      | div |                   | `` => ``      | TBD
-72      | mod |                   | `` => ``      | TBD
-72      | add |                   | `` => ``      | TBD
-72      | sub |                   | `` => ``      | TBD
-72      | pow |                   | `` => ``      | TBD
-72      | shl |                   | `` => ``      | TBD
-72      | sar |                   | `` => ``      | TBD
-72      | shr |                   | `` => ``      | TBD
-72      | lt |                   | `` => ``      | TBD
-72      | lte |                   | `` => ``      | TBD
-72      | gt |                   | `` => ``      | TBD
-72      | gte |                   | `` => ``      | TBD
-72      | instanceof |                   | `` => ``      | TBD
-72      | in |                   | `` => ``      | TBD
-72      | eq |                   | `` => ``      | TBD
-72      | neq |                   | `` => ``      | TBD
-72      | strict_eq |                   | `` => ``      | TBD
-72      | strict_neq |                   | `` => ``      | TBD
-72      | and |                   | `` => ``      | TBD
-72      | xor |                   | `` => ``      | TBD
-72      | or |                   | `` => ``      | TBD
-72      | is_undefined_or_null |                   | `` => ``      | TBD
-72      | nop |                   | `` => ``      | TBD
-
-
+8C      | neg               |                   | `a` => `-a`                       | unary negative operator
+8D      | plus              |                   | `a` => `+a`                       | unary plus operator
+8E      | dec               |                   | `a` => `a - 1`                    | unary decrement operator
+8F      | inc               |                   | `a` => `a + 1`                    | unary increment operator
+90      | post_dec          |                   | `a` => `a - 1, a`                 | push `a - 1` to the stack
+91      | post_inc          |                   | `a` => `a + 1, a`                 | push `a + 1` to the stack
+92      | dec_loc           | 1:index           | `.` => `.`                        | decrement local variable, `var_buf[index] = var_buf[index] - 1`
+93      | inc_loc           | 1:index           | `.` => `.`                        | increment local variable, `var_buf[index] = var_buf[index] + 1`
+94      | add_loc           | 1:index           | `a` => `.`                        | add `a` to local variable, `var_buf[index] = var_buf[index] + a`
+95      | not               |                   | `a` => `~a`                       | binary not operator
+96      | lnot              |                   | `a` => `!a`                       | boolean not operator
+97      | typeof            |                   | `a` => `typeof a`                 | `typeof` operator
+98      | delete            |                   | `prop, obj` => `success`          | delete object property, return whether delete succeeds
+99      | delete_var        | 4:atom            | `.` => `success`                  | delete global object's property, return whether delete succeeds
+9A      | mul               |                   | `a, b` => `b * a`                 | multiply operator
+9B      | div               |                   | `a, b` => `b / a`                 | divide operator
+9C      | mod               |                   | `a, b` => `b % a`                 | modulate operator
+9D      | add               |                   | `a, b` => `b + a`                 | add operator
+9E      | sub               |                   | `a, b` => `b - a`                 | subtraction operator
+9F      | pow               |                   | `a, b` => `pow(b, a)`             | power operator
+A0      | shl               |                   | `a, b` => `b << a`                | shift logical left operator
+A1      | sar               |                   | `a, b` => `b >> a`                | shift arithmetic right operator
+A2      | shr               |                   | `a, b` => `b >> a`                | shift logical right operator
+A3      | lt                |                   | `a, b` => `b < a`                 | less than compare
+A4      | lte               |                   | `a, b` => `b <= a`                | less than or equal compare
+A5      | gt                |                   | `a, b` => `b > a`                 | greater compare
+A6      | gte               |                   | `a, b` => `b >= a`                | greater or equal compare
+A7      | instanceof        |                   | `obj, cls` => `obj instanceof cls` | object is instanceof class
+A8      | in                |                   | `obj, prop` => `prop in obj`      | check object has property
+A9      | eq                |                   | `a, b` => `b == a`                | equal compare
+AA      | neq               |                   | `a, b` => `b != a`                | not equal compare
+AB      | strict_eq         |                   | `a, b` => `b === a`               | strict equal compare
+AC      | strict_neq        |                   | `a, b` => `b !== a`               | not strict equal compare
+AD      | and               |                   | `a, b` => `b & a`                 | binary and operator
+AE      | xor               |                   | `a, b` => `b ^ a`                 | binary xor operator
+AF      | or                |                   | `a, b` => `b | a`                 | binary or operator
+B0      | is_undefined_or_null |                | `a` => `a_is_undefined_or_null`   | check `a === undefined || a === null`
+B1      | nop               |                   | `.` => `.`                        | no-operation, VM will skip this opcode
+B2      | enter_scope       |                   | `` => ``                        |
+B2      | leave_scope               |                   | `` => ``                        |
+B2      | label               |                   | `` => ``                        |
+B2      | scope_get_var_undef               |                   | `` => ``                        |
+B2      | scope_get_var               |                   | `` => ``                        |
+B2      | scope_put_var               |                   | `` => ``                        |
+B2      | scope_delete_var               |                   | `` => ``                        |
+B2      | scope_make_ref               |                   | `` => ``                        |
+B2      | scope_get_ref               |                   | `` => ``                        |
+B2      | scope_put_var_init               |                   | `` => ``                        |
+B2      | scope_get_private_field               |                   | `` => ``                        |
+B2      | scope_get_private_field2               |                   | `` => ``                        |
+B2      | scope_put_private_field               |                   | `` => ``                        |
+B2      | set_class_name               |                   | `` => ``                        |
+B2      | line_num               |                   | `` => ``                        |
+B2      | push_minus1               |                   | `` => ``                        |
+B2      | push_0               |                   | `` => ``                        |
+B2      | push_1               |                   | `` => ``                        |
+B2      | push_2               |                   | `` => ``                        |
+B2      | push_3               |                   | `` => ``                        |
+B2      | push_4               |                   | `` => ``                        |
+B2      | push_5               |                   | `` => ``                        |
+B2      | push_6               |                   | `` => ``                        |
+B2      | push_7               |                   | `` => ``                        |
+B2      | push_i8               |                   | `` => ``                        |
+B2      | push_i16              |                   | `` => ``                        |
+B2      | push_const8               |                   | `` => ``                        |
+B2      | fclosure8               |                   | `` => ``                        |
+B2      | push_empty_string               |                   | `` => ``                        |
+B2      | get_loc8               |                   | `` => ``                        |
+B2      | put_loc8               |                   | `` => ``                        |
+B2      | set_loc8               |                   | `` => ``                        |
+B2      | get_loc0               |                   | `` => ``                        |
+B2      | get_loc1               |                   | `` => ``                        |
+B2      | get_loc2               |                   | `` => ``                        |
+B2      | get_loc3               |                   | `` => ``                        |
+B2      | put_loc0               |                   | `` => ``                        |
+B2      | put_loc1               |                   | `` => ``                        |
+B2      | put_loc2               |                   | `` => ``                        |
+B2      | put_loc3               |                   | `` => ``                        |
+B2      | set_loc0               |                   | `` => ``                        |
+B2      | set_loc1               |                   | `` => ``                        |
+B2      | set_loc2               |                   | `` => ``                        |
+B2      | set_loc3               |                   | `` => ``                        |
+B2      | get_arg0               |                   | `` => ``                        |
+B2      | get_arg1               |                   | `` => ``                        |
+B2      | get_arg2               |                   | `` => ``                        |
+B2      | get_arg3               |                   | `` => ``                        |
+B2      | put_arg0               |                   | `` => ``                        |
+B2      | put_arg1               |                   | `` => ``                        |
+B2      | put_arg2               |                   | `` => ``                        |
+B2      | put_arg3               |                   | `` => ``                        |
+B2      | set_arg0               |                   | `` => ``                        |
+B2      | set_arg1               |                   | `` => ``                        |
+B2      | set_arg2               |                   | `` => ``                        |
+B2      | set_arg3               |                   | `` => ``                        |
+B2      | get_var_ref0               |                   | `` => ``                        |
+B2      | get_var_ref1               |                   | `` => ``                        |
+B2      | get_var_ref2              |                   | `` => ``                        |
+B2      | get_var_ref3               |                   | `` => ``                        |
+B2      | put_var_ref0               |                   | `` => ``                        |
+B2      | put_var_ref1               |                   | `` => ``                        |
+B2      | put_var_ref2               |                   | `` => ``                        |
+B2      | put_var_ref3               |                   | `` => ``                        |
+B2      | set_var_ref0               |                   | `` => ``                        |
+B2      | set_var_ref1               |                   | `` => ``                        |
+B2      | set_var_ref2               |                   | `` => ``                        |
+B2      | set_var_ref3               |                   | `` => ``                        |
+B2      | get_length               |                   | `` => ``                        |
+B2      | if_false8               |                   | `` => ``                        |
+B2      | if_true8               |                   | `` => ``                        |
+B2      | goto8               |                   | `` => ``                        |
+B2      | goto16               |                   | `` => ``                        |
+B2      | call0               |                   | `` => ``                        |
+B2      | call1               |                   | `` => ``                        |
+B2      | call2               |                   | `` => ``                        |
+B2      | call3               |                   | `` => ``                        |
+B2      | is_undefined               |                   | `` => ``                        |
+B2      | is_null               |                   | `` => ``                        |
+B2      | typeof_is_undefined               |                   | `` => ``                        |
+B2      | typeof_is_function               |                   | `` => ``                        |
 
 
 TBD...
