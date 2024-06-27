@@ -222,88 +222,91 @@ AD      | and               |                   | `a, b` => `b & a`             
 AE      | xor               |                   | `a, b` => `b ^ a`                 | binary xor operator
 AF      | or                |                   | `a, b` => `b | a`                 | binary or operator
 B0      | is_undefined_or_null |                | `a` => `a_is_undefined_or_null`   | check `a === undefined || a === null`
+        |                   |                   |                                   | 
+        | SHORT OPCODES     |                   |                                   | short opcodes
+        |                   |                   |                                   | 
 B1      | nop               |                   | `.` => `.`                        | no-operation, VM will skip this opcode
-B2      | enter_scope       |                   | `` => ``                        |
-B2      | leave_scope               |                   | `` => ``                        |
-B2      | label               |                   | `` => ``                        |
-B2      | scope_get_var_undef               |                   | `` => ``                        |
-B2      | scope_get_var               |                   | `` => ``                        |
-B2      | scope_put_var               |                   | `` => ``                        |
-B2      | scope_delete_var               |                   | `` => ``                        |
-B2      | scope_make_ref               |                   | `` => ``                        |
-B2      | scope_get_ref               |                   | `` => ``                        |
-B2      | scope_put_var_init               |                   | `` => ``                        |
-B2      | scope_get_private_field               |                   | `` => ``                        |
-B2      | scope_get_private_field2               |                   | `` => ``                        |
-B2      | scope_put_private_field               |                   | `` => ``                        |
-B2      | set_class_name               |                   | `` => ``                        |
-B2      | line_num               |                   | `` => ``                        |
-B2      | push_minus1               |                   | `` => ``                        |
-B2      | push_0               |                   | `` => ``                        |
-B2      | push_1               |                   | `` => ``                        |
-B2      | push_2               |                   | `` => ``                        |
-B2      | push_3               |                   | `` => ``                        |
-B2      | push_4               |                   | `` => ``                        |
-B2      | push_5               |                   | `` => ``                        |
-B2      | push_6               |                   | `` => ``                        |
-B2      | push_7               |                   | `` => ``                        |
-B2      | push_i8               |                   | `` => ``                        |
-B2      | push_i16              |                   | `` => ``                        |
-B2      | push_const8               |                   | `` => ``                        |
-B2      | fclosure8               |                   | `` => ``                        |
-B2      | push_empty_string               |                   | `` => ``                        |
-B2      | get_loc8               |                   | `` => ``                        |
-B2      | put_loc8               |                   | `` => ``                        |
-B2      | set_loc8               |                   | `` => ``                        |
-B2      | get_loc0               |                   | `` => ``                        |
-B2      | get_loc1               |                   | `` => ``                        |
-B2      | get_loc2               |                   | `` => ``                        |
-B2      | get_loc3               |                   | `` => ``                        |
-B2      | put_loc0               |                   | `` => ``                        |
-B2      | put_loc1               |                   | `` => ``                        |
-B2      | put_loc2               |                   | `` => ``                        |
-B2      | put_loc3               |                   | `` => ``                        |
-B2      | set_loc0               |                   | `` => ``                        |
-B2      | set_loc1               |                   | `` => ``                        |
-B2      | set_loc2               |                   | `` => ``                        |
-B2      | set_loc3               |                   | `` => ``                        |
-B2      | get_arg0               |                   | `` => ``                        |
-B2      | get_arg1               |                   | `` => ``                        |
-B2      | get_arg2               |                   | `` => ``                        |
-B2      | get_arg3               |                   | `` => ``                        |
-B2      | put_arg0               |                   | `` => ``                        |
-B2      | put_arg1               |                   | `` => ``                        |
-B2      | put_arg2               |                   | `` => ``                        |
-B2      | put_arg3               |                   | `` => ``                        |
-B2      | set_arg0               |                   | `` => ``                        |
-B2      | set_arg1               |                   | `` => ``                        |
-B2      | set_arg2               |                   | `` => ``                        |
-B2      | set_arg3               |                   | `` => ``                        |
-B2      | get_var_ref0               |                   | `` => ``                        |
-B2      | get_var_ref1               |                   | `` => ``                        |
-B2      | get_var_ref2              |                   | `` => ``                        |
-B2      | get_var_ref3               |                   | `` => ``                        |
-B2      | put_var_ref0               |                   | `` => ``                        |
-B2      | put_var_ref1               |                   | `` => ``                        |
-B2      | put_var_ref2               |                   | `` => ``                        |
-B2      | put_var_ref3               |                   | `` => ``                        |
-B2      | set_var_ref0               |                   | `` => ``                        |
-B2      | set_var_ref1               |                   | `` => ``                        |
-B2      | set_var_ref2               |                   | `` => ``                        |
-B2      | set_var_ref3               |                   | `` => ``                        |
-B2      | get_length               |                   | `` => ``                        |
-B2      | if_false8               |                   | `` => ``                        |
-B2      | if_true8               |                   | `` => ``                        |
-B2      | goto8               |                   | `` => ``                        |
-B2      | goto16               |                   | `` => ``                        |
-B2      | call0               |                   | `` => ``                        |
-B2      | call1               |                   | `` => ``                        |
-B2      | call2               |                   | `` => ``                        |
-B2      | call3               |                   | `` => ``                        |
-B2      | is_undefined               |                   | `` => ``                        |
-B2      | is_null               |                   | `` => ``                        |
-B2      | typeof_is_undefined               |                   | `` => ``                        |
-B2      | typeof_is_function               |                   | `` => ``                        |
-
-
-TBD...
+B2      | push_minus1       |                   | `.` => `a`                        | short opcode, push `a = -1`
+B3      | push_0            |                   | `.` => `a`                        | short opcode, push `a = 0`
+B4      | push_1            |                   | `.` => `a`                        | short opcode, push `a = 1`
+B5      | push_2            |                   | `.` => `a`                        | short opcode, push `a = 2`
+B6      | push_3            |                   | `.` => `a`                        | short opcode, push `a = 3`
+B7      | push_4            |                   | `.` => `a`                        | short opcode, push `a = 4`
+B8      | push_5            |                   | `.` => `a`                        | short opcode, push `a = 5`
+B9      | push_6            |                   | `.` => `a`                        | short opcode, push `a = 6`
+BA      | push_7            |                   | `.` => `a`                        | short opcode, push `a = 7`
+BB      | push_i8           | 1:value           | `.` => `a`                        | short opcode, push `a = value`
+BC      | push_i16          | 2:value           | `.` => `a`                        | short opcode, push `a = value`
+BD      | push_const8       | 1:index           | `.` => `a`                        | short opcode, push `a = cpool[index]`
+BE      | fclosure8         | 1:index           | `.` => `a`                        | short opcode, fetch function from the constant pool, bind var refs with current context, push the new closure
+BF      | push_empty_string |                   | `.` => `a`                        | short opcode, push empty string
+C0      | get_loc8          | 1:index           | `.` => `a`                        | short opcode, push local variable `var_buf[index]` to the stack
+C1      | put_loc8          | 1:index           | `a` => `.`                        | short opcode, set local variable, `var_buf[index] = a`
+C2      | set_loc8          | 1:index           | `a` => `a`                        | short opcode, set local variable, `var_buf[index] = a`
+C3      | get_loc0          |                   | `.` => `a`                        | short opcode, push local variable `var_buf[0]` to the stack
+C4      | get_loc1          |                   | `.` => `a`                        | short opcode, push local variable `var_buf[1]` to the stack
+C5      | get_loc2          |                   | `.` => `a`                        | short opcode, push local variable `var_buf[2]` to the stack
+C6      | get_loc3          |                   | `.` => `a`                        | short opcode, push local variable `var_buf[3]` to the stack
+C7      | put_loc0          |                   | `a` => `.`                        | short opcode, set local variable, `var_buf[0] = a`
+C8      | put_loc1          |                   | `a` => `.`                        | short opcode, set local variable, `var_buf[1] = a`
+C9      | put_loc2          |                   | `a` => `.`                        | short opcode, set local variable, `var_buf[2] = a`
+CA      | put_loc3          |                   | `a` => `.`                        | short opcode, set local variable, `var_buf[3] = a`
+CB      | set_loc0          |                   | `a` => `a`                        | short opcode, set local variable, `var_buf[0] = a`
+CC      | set_loc1          |                   | `a` => `a`                        | short opcode, set local variable, `var_buf[1] = a`
+CD      | set_loc2          |                   | `a` => `a`                        | short opcode, set local variable, `var_buf[2] = a`
+CE      | set_loc3          |                   | `a` => `a`                        | short opcode, set local variable, `var_buf[3] = a`
+CF      | get_arg0          |                   | `.` => `a`                        | short opcode, push function argument `arg_buf[0]` to the stack
+D0      | get_arg1          |                   | `.` => `a`                        | short opcode, push function argument `arg_buf[1]` to the stack
+D1      | get_arg2          |                   | `.` => `a`                        | short opcode, push function argument `arg_buf[2]` to the stack
+D2      | get_arg3          |                   | `.` => `a`                        | short opcode, push function argument `arg_buf[3]` to the stack
+D3      | put_arg0          |                   | `a` => `.`                        | short opcode, set function argument, `arg_buf[0] = a`
+D4      | put_arg1          |                   | `a` => `.`                        | short opcode, set function argument, `arg_buf[1] = a`
+D5      | put_arg2          |                   | `a` => `.`                        | short opcode, set function argument, `arg_buf[2] = a`
+D6      | put_arg3          |                   | `a` => `.`                        | short opcode, set function argument, `arg_buf[3] = a`
+D7      | set_arg0          |                   | `a` => `a`                        | short opcode, set function argument, `arg_buf[0] = a`
+D8      | set_arg1          |                   | `a` => `a`                        | short opcode, set function argument, `arg_buf[1] = a`
+D9      | set_arg2          |                   | `a` => `a`                        | short opcode, set function argument, `arg_buf[2] = a`
+DA      | set_arg3          |                   | `a` => `a`                        | short opcode, set function argument, `arg_buf[3] = a`
+DB      | get_var_ref0      |                   | `.` => `a`                        | short opcode, push variable reference `var_refs[0]` to the stack
+DC      | get_var_ref1      |                   | `.` => `a`                        | short opcode, push variable reference `var_refs[1]` to the stack
+DD      | get_var_ref2      |                   | `.` => `a`                        | short opcode, push variable reference `var_refs[2]` to the stack
+DE      | get_var_ref3      |                   | `.` => `a`                        | short opcode, push variable reference `var_refs[3]` to the stack
+DF      | put_var_ref0      |                   | `a` => `.`                        | short opcode, set variable reference, `var_refs[0] = a`
+E0      | put_var_ref1      |                   | `a` => `.`                        | short opcode, set variable reference, `var_refs[1] = a`
+E1      | put_var_ref2      |                   | `a` => `.`                        | short opcode, set variable reference, `var_refs[2] = a`
+E2      | put_var_ref3      |                   | `a` => `.`                        | short opcode, set variable reference, `var_refs[3] = a`
+E3      | set_var_ref0      |                   | `a` => `a`                        | short opcode, set variable reference, `var_refs[0] = a`
+E4      | set_var_ref1      |                   | `a` => `a`                        | short opcode, set variable reference, `var_refs[1] = a`
+E5      | set_var_ref2      |                   | `a` => `a`                        | short opcode, set variable reference, `var_refs[2] = a`
+E6      | set_var_ref3      |                   | `a` => `a`                        | short opcode, set variable reference, `var_refs[3] = a`
+E7      | get_length        |                   | `a` => `length(a)`                | short opcode, get length of stack top value
+E8      | if_false8         | 1:label           | `cond` => `.`                     | short opcode, offset current instruction pointer if false, `if (!cond) pc += label`
+E9      | if_true8          | 1:label           | `cond` => `.`                     | short opcode, offset current instruction pointer if false, `if (cond) pc += label`
+EA      | goto8             | 1:label           | `.` => `.`                        | short opcode, offset current instruction pointer, `pc += label`
+EB      | goto16            | 2:label           | `.` => `.`                        | short opcode, offset current instruction pointer, `pc += label`
+EC      | call0             |                   | `func_obj` => `func_ret`          | short opcode, for `call` with argc = 0
+ED      | call1             |                   | `func_obj, arg0` => `func_ret`    | short opcode, for `call` with argc = 1
+EE      | call2             |                   | `func_obj, arg0, arg1` => `func_ret` | short opcode, for `call` with argc = 2
+EF      | call3             |                   | `func_obj, arg0, arg1, arg2` => `func_ret` | short opcode, for `call` with argc = 3
+F0      | is_undefined      |                   | `a` => `a === undefined`          | short opcode, check `a === undefined`
+F1      | is_null           |                   | `a` => `a === null`               | short opcode, check `a === undefined`
+F2      | typeof_is_undefined |                 | `a` => `typeof a === 'undefined'` | short opcode, check `typeof a === 'undefined'`
+F3      | typeof_is_function |                  | `a` => `typeof a === 'function'`  | short opcode, check `typeof a === 'function'`
+        |                   |                   |                                   |
+        | TEMPORARY OPCODES |                   |                                   | temporary opcodes, removed later
+        |                   |                   |                                   |
+B2      | enter_scope       | 2:scope           | `.` => `.`                        | removed later in `resolve_variables()`
+B3      | leave_scope       | 2:scope           | `.` => `.`                        | removed later in `resolve_variables()`
+B4      | label             | 4:label           | `.` => `.`                        | removed later in `resolve_labels()`
+B5      | scope_get_var_undef | 4:var_name, 2:scope | `.` => `.`                    | removed later in `resolve_variables()`
+B6      | scope_get_var     | 4:var_name, 2:scope | `.` => `.`                      | removed later in `resolve_variables()`
+B7      | scope_put_var     | 4:var_name, 2:scope | `.` => `.`                      | removed later in `resolve_variables()`
+B8      | scope_delete_var  | 4:var_name, 2:scope | `.` => `.`                      | removed later in `resolve_variables()`
+B9      | scope_make_ref    | 4:var_name, 4:label, 2:scope | `.` => `.`             | removed later in `resolve_variables()`
+BA      | scope_get_ref     | 4:var_name, 2:scope | `.` => `.`                      | removed later in `resolve_variables()`
+BB      | scope_put_var_init | 4:var_name, 2:scope | `.` => `.`                     | removed later in `resolve_variables()`
+BC      | scope_get_private_field | 4:var_name, 2:scope | `.` => `.`                | removed later in `resolve_variables()`
+BD      | scope_get_private_field2 | 4:var_name, 2:scope | `.` => `.`               | removed later in `resolve_variables()`
+BE      | scope_put_private_field | 4:var_name, 2:scope | `.` => `.`                | removed later in `resolve_variables()`
+BF      | set_class_name    | 4:class_offset    | `.` => `.`                        | set class name
+C0      | line_num          | 4:line            | `.` => `.`                        | debug line number
