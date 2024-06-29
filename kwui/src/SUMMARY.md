@@ -15,4 +15,5 @@
 
 - [Advanced Topics]()
     - [QuickJS VM](./advanced/quickjs_vm.md)
+        - [JSValue Representation](./advanced/quickjs_value.md)
         - [QuickJS Opcodes](./advanced/quickjs_opcode.md)
