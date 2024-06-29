@@ -36,8 +36,8 @@ NaN number  | 7 | 0
 `null`      | 3 | 0
 `undefined` | 4 | 0
 `exception` | 6 | 0
-`object`    | 8 | 0
-`string`    | 11 | 0
-`symbol`    | 12 | 0
+`object`    | 8 | `JSObject*`
+`string`    | 11 | `JSString*`
+`symbol`    | 12 | `JSAtomStruct*`
 
 Reference counted JSValue type (such as object, string, symbol), the most significant bit of `tag` is 1.
