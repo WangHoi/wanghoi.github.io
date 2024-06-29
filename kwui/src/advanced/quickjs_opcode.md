@@ -45,7 +45,7 @@ Typical operand types:
 | Hex   | Name              | Operands          | Stack      | Notes |
 | :---: | :---              | :---              | :---       | :---  |
 |       |                   | [bytes]:[type]    | top, bottom|       |
-00      | invalid           |                   || never emitted invalid opcode
+00      | invalid           |                   |                                   | never emitted invalid opcode
 01      | push_i32          | 4: value          | `.` => `a`                        | push the i32 value
 02      | push_const        | 4: index          | `.` => `a`                        | fetch value from the constant pool, push
 03      | fclosure          | 4: index          | `.` => `a`                        | must follow push_const, fetch function from the constant pool, bind var refs with current context, push the new closure
@@ -220,8 +220,8 @@ AB      | strict_eq         |                   | `a, b` => `b === a`           
 AC      | strict_neq        |                   | `a, b` => `b !== a`               | not strict equal compare
 AD      | and               |                   | `a, b` => `b & a`                 | binary and operator
 AE      | xor               |                   | `a, b` => `b ^ a`                 | binary xor operator
-AF      | or                |                   | `a, b` => `b | a`                 | binary or operator
-B0      | is_undefined_or_null |                | `a` => `a_is_undefined_or_null`   | check `a === undefined || a === null`
+AF      | or                |                   | `a, b` => `b \| a`                 | binary or operator
+B0      | is_undefined_or_null |                | `a` => `a_is_undefined_or_null`   | check `a === undefined \|\| a === null`
         |                   |                   |                                   | 
         | SHORT OPCODES     |                   |                                   | short opcodes
         |                   |                   |                                   | 
