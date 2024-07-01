@@ -6,14 +6,107 @@ The bytecode compatibilities of QuickJS VM, depends on macro defines.
 We are compiling QuickJS with:
 
 ```cpp
+// #undef CONFIG_ATOMICS
 // #undef CONFIG_BIGNUM
 // #undef CONFIG_DEBUGGER
 #define SHORT_OPCODES 1
 ```
 
+* Atomics support disabled.
 * Big number extension disabled.
-* Debugger opcodes enabled.
+* Debugger opcodes disabled.
 * Extra short opcodes enabled.
+
+## ByteCode Module Format
+
+After the JavaScript module file is compiled, the module's bytecode can be serialized, and loaded later.
+
+Lexical-scope child functions are serialized recursively as parent function's constants.
+
+## Notation
+
+* multi-bytes values are serialized in little endian order.
+* `ATOM` - interned string - when serialization, converted to zero started index.
+* `xB` - length is `x` bytes
+* `LEB128` - Little Endian Base 128 – length is a variable-length encoding format designed to store arbitrarily large integers in a small number of bytes. There are two variations: unsigned LEB128 and signed LEB128. These vary slightly, so a user program that wants to decode LEB128 values would explictly choose the appropriate unsigned or signed methods.
+* `STRING` - string length, followed by utf-8 or utf1-16 string data
+
+### Compiled Module Specification
+
+* The compiled script module contains:
+    ```
+    1B: version
+    LEB128: number of atoms
+        [STRING][STRING][STRING] : an array of atom strings
+    MODULE: script module
+        FUNCTION - module root function
+    ```
+* STRING
+    ```
+    LEB128: for utf-8 string, `length << 1`, for utf-16 string, `(length << 2) + 1`
+    [1B] or [2B]: utf-8 or utf-16 string data
+    ```
+* ATOM
+    ```
+    LEB128: for intger atom, `(atom << 1) | 1`, for string atom, converted to `(first_atom + index) << 1`
+    ```
+* MODULE
+    ```
+    1B: module tag, hex `0x0f`
+    ATOM: module name
+    LEB128: number of requested module entries
+        [ATOM]: requested module name
+    LEB128: number of exported module entries
+        [LOCAL_EXPORT] or [INDIRECT_EXPORT]: local variable/function export or indirect export
+    LEB128: number of star exported module entries
+        [LEB128]: star exported module indexes
+    LEB128: number of imported module entries
+        [IMPORT]: imported modules
+    ```
+* FUNCTION
+    ```
+    1B: function tag, hex `0x0e`
+    2B: flag, from lsb to msb:
+        1b: has_prototype
+        1b: has_simple_paramter_list
+        1b: is_derived_class_constructor
+        1b: need_home_object
+        2b: func_kind
+        1b: new_target_allowed
+        1b: super_call_allowed
+        1b: super_allowed
+        1b: arguments_allowed
+        1b: has_debug
+        1b: backtrace_barrier
+        4b: _unused_
+    1B: js mode, 1: strict
+    ATOM: function name
+    LEB128: argument count
+    LEB128: variable count
+    LEB128: defined argument count
+    LEB128: stack size
+    LEB128: closure variable count
+    LEB128: constant `JS_VALUE` pool count
+    LEB128: bytecode length
+    LEB128: `(arg_count + var_count)`
+    [VAR_DEF]: `(arg_count + var_count)` variable definitions
+    [CLOSURE_VAR]: `closure_var_count` closure variable definitions
+    FUNCTION_BYTECODES - raw function bytecodes, atoms inside operands and converted to atom indices
+    DEBUG_INFO - optional script debug information
+    [JS_VALUE] - `cpool_count` - script constant values
+    ```
+* DEBUG_INFO
+    ```
+    ATOM - script filename
+    LEB128 - script start line number
+    LEB128 - `pc2line_len` - size of the opcodes to line number table
+        [1B] - `pc2line_buf`
+    ```
+
+* JS_VALUE
+    ```
+    FUNCTION, STRING, OBJECT, or ARRAY
+    ```
 
 ## ByteCode References
 
@@ -220,11 +313,11 @@ AB      | strict_eq         |                   | `a, b` => `b === a`           
 AC      | strict_neq        |                   | `a, b` => `b !== a`               | not strict equal compare
 AD      | and               |                   | `a, b` => `b & a`                 | binary and operator
 AE      | xor               |                   | `a, b` => `b ^ a`                 | binary xor operator
-AF      | or                |                   | `a, b` => `b \| a`                 | binary or operator
+AF      | or                |                   | `a, b` => `b \| a`                | binary or operator
 B0      | is_undefined_or_null |                | `a` => `a_is_undefined_or_null`   | check `a === undefined \|\| a === null`
-        |                   |                   |                                   | 
-        | SHORT OPCODES     |                   |                                   | short opcodes
-        |                   |                   |                                   | 
+|       |                   |                   |                                   | 
+|       | SHORT OPCODES     |                   |                                   | short opcodes
+|       |                   |                   |                                   | 
 B1      | nop               |                   | `.` => `.`                        | no-operation, VM will skip this opcode
 B2      | push_minus1       |                   | `.` => `a`                        | short opcode, push `a = -1`
 B3      | push_0            |                   | `.` => `a`                        | short opcode, push `a = 0`
@@ -292,9 +385,9 @@ F0      | is_undefined      |                   | `a` => `a === undefined`      
 F1      | is_null           |                   | `a` => `a === null`               | short opcode, check `a === undefined`
 F2      | typeof_is_undefined |                 | `a` => `typeof a === 'undefined'` | short opcode, check `typeof a === 'undefined'`
 F3      | typeof_is_function |                  | `a` => `typeof a === 'function'`  | short opcode, check `typeof a === 'function'`
-        |                   |                   |                                   |
-        | TEMPORARY OPCODES |                   |                                   | temporary opcodes, removed later
-        |                   |                   |                                   |
+|       |                   |                   |                                   |
+|       | TEMPORARY OPCODES |                   |                                   | temporary opcodes, removed later
+|       |                   |                   |                                   |
 B2      | enter_scope       | 2:scope           | `.` => `.`                        | removed later in `resolve_variables()`
 B3      | leave_scope       | 2:scope           | `.` => `.`                        | removed later in `resolve_variables()`
 B4      | label             | 4:label           | `.` => `.`                        | removed later in `resolve_labels()`
@@ -310,3 +403,4 @@ BD      | scope_get_private_field2 | 4:var_name, 2:scope | `.` => `.`           
 BE      | scope_put_private_field | 4:var_name, 2:scope | `.` => `.`                | removed later in `resolve_variables()`
 BF      | set_class_name    | 4:class_offset    | `.` => `.`                        | set class name
 C0      | line_num          | 4:line            | `.` => `.`                        | debug line number
+
