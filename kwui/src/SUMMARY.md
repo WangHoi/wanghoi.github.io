@@ -16,3 +16,4 @@
     - [QuickJS VM](./advanced/quickjs_vm.md)
         - [JSValue Representation](./advanced/quickjs_value.md)
         - [QuickJS Opcodes](./advanced/quickjs_opcode.md)
+        - [Live Reload](./advanced/quickjs_reload.md)

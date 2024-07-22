@@ -4,7 +4,7 @@
 
 ### assets/entry.js
 
-**kwui** ScriptEngine load and run the JavaScript entry javascript: `assets/entry.js`. It shows a `Dialog` with parameters, such as dialog window width, height, and script module path of gui root component.
+**kwui** ScriptEngine load and run the JavaScript entry file: `assets/entry.js`. It shows a `Dialog` with parameters, such as dialog window width, height, and script module path of gui root component.
 ```javascript
 app.showDialog({
 	title: "Hello kwui",
