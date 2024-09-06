@@ -26,35 +26,47 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     env:
-      MDBOOK_VERSION: '0.4.40'
-      MDBOOK_LINKCHECK_VERSION: '0.7.4'
-      MDBOOK_MERMAID_VERSION: '0.8.3'
+      MDBOOK_VERSION: "0.4.40"
+      MDBOOK_LINKCHECK_VERSION: "0.7.4"
+      MDBOOK_MERMAID_VERSION: "0.8.3"
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install mdbook
-      run: |
-        mkdir ~/tools
-        curl -L https://github.com/rust-lang/mdBook/releases/download/v$MDBOOK_VERSION/mdbook-v$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
-        curl -L https://github.com/badboy/mdbook-mermaid/releases/download/v$MDBOOK_MERMAID_VERSION/mdbook-mermaid-v$MDBOOK_MERMAID_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
-        curl -L https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/download/v$MDBOOK_LINKCHECK_VERSION/mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -O
-        unzip mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -d ~/tools
-        chmod +x ~/tools/mdbook-linkcheck
-        curl -s https://api.github.com/repos/zjp-CN/mdbook-theme/releases/latest \
-               | grep browser_download_url \
-               | grep mdbook-theme_linux \
-               | cut -d '"' -f 4 \
-               | wget -qi -
-        tar -xzf mdbook-theme_linux.tar.gz -C ~/tools
-        echo ~/tools >> $GITHUB_PATH
-    - name: Build
-      run: mdbook build kwui
-    # share between different jobs
-    - uses: actions/upload-artifact@v4
-      with:
-        name: kwui_book
-        path: kwui/book/
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Install mdbook
+        run: |
+          mkdir ~/tools
+          curl -L https://github.com/rust-lang/mdBook/releases/download/v$MDBOOK_VERSION/mdbook-v$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
+          curl -L https://github.com/badboy/mdbook-mermaid/releases/download/v$MDBOOK_MERMAID_VERSION/mdbook-mermaid-v$MDBOOK_MERMAID_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
+          curl -L https://github.com/Michael-F-Bryan/mdbook-linkcheck/releases/download/v$MDBOOK_LINKCHECK_VERSION/mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -O
+          unzip mdbook-linkcheck.v$MDBOOK_LINKCHECK_VERSION.x86_64-unknown-linux-gnu.zip -d ~/tools
+          chmod +x ~/tools/mdbook-linkcheck
+          curl -s https://api.github.com/repos/zjp-CN/mdbook-theme/releases/latest \
+                 | grep browser_download_url \
+                 | grep mdbook-theme_linux \
+                 | cut -d '"' -f 4 \
+                 | wget -qi -
+          tar -xzf mdbook-theme_linux.tar.gz -C ~/tools
+          echo ~/tools >> $GITHUB_PATH
+      - name: Build kwui mdbook
+        run: mdbook build kwui
+      # share between different jobs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kwui_book
+          path: kwui/book/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: landing_pages
+          path: landing/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: virtual_earth_pages
+          path: virtual_earth/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fft_ocean_pages
+          path: fft-ocean/
   # Single deploy job since we're just deploying
   deploy:
     needs: build
@@ -65,19 +77,33 @@ jobs:
     steps:
       - name: Create dir
         run: |
-          mkdir -p book/kwui
-      - name: Download artifact
-        id: download-artifact
+          mkdir -p virtual_earth
+          mkdir -p fft-ocean
+          mkdir -p kwui
+      - name: Download virtual_earth artifact
+        id: download-virtual-earth-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: virtual_earth_pages
+          path: virtual_earth/
+      - name: Download fft-ocean artifact
+        id: download-fft-ocean-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: fft_ocean_pages
+          path: fft-ocean/
+      - name: Download kwui mdbook artifact
+        id: download-kwui-book-artifact
         uses: actions/download-artifact@v4
         with:
           name: kwui_book
-          path: book/kwui/
+          path: kwui/
       - name: Setup Pages
         uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: book/
+          path: .
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1

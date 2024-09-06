@@ -1,0 +1,112 @@
+@font-face {
+   font-family: 'elvish-italic-italic';
+   src: url('fonts/HalfElvenItalicItalic-4O3l.ttf');
+}
+body
+{
+   font-family: Segoe UI Light, Tahoma, Arial, Helvetica;
+   color: #eee;
+	background: #333;
+	/* background-image: url("images/stone.jpg"); */
+}
+p.title, div.title
+{
+   padding: 1.5em;
+   text-align: center;
+   font-weight: bold;
+   font-size: 2.5em;
+   text-shadow: 1px 1px 3px rgba(55,55,55, .5);
+}
+a,
+a:visited,
+a:hover
+{
+   text-decoration: none;
+}
+a:hover
+{
+   text-decoration: underline;
+}
+P
+{
+   padding-left: 2em;
+   padding-top: 0.5em;
+   line-height: 1.5em;
+   font-size: 1em;
+}
+P.left
+{
+   padding-left: 1em;
+   line-height: 1.2em;
+}
+.small
+{
+   text-align:center;
+   font-size: 0.75em;
+}
+P.lowtitle
+{
+   text-align: center;
+   font-size: 1.5em;
+   line-height: 1.2em;
+   padding-top: 0;
+   padding-left: 1.1em;
+   padding-bottom: 1.5em;
+}
+P.subtitle
+{
+   font-size: 1.75em;
+   font-weight: bold;
+   line-height: 1.1em;
+   padding-top: 0;
+   padding-left: 1.1em;
+   padding-bottom: 0.1em;
+}
+a, a:visited, a:active, a:hover
+{
+   color: #fff6e2;
+   text-shadow: 1px 1px 3px rgba(0,0,0, .5);
+}
+div.container
+{
+   width: 55%;
+   margin-left: auto;
+   margin-right: auto;
+}
+div.row
+{
+   clear: both;
+}
+div.column-left img
+{
+   box-shadow: 0 0 16px rgba(0,0,0,0.5);
+}
+div.column-left
+{
+   width: 340px;
+   text-align: right;
+   float: left;
+   padding-right: 24px;
+}
+div.column-right
+{
+   max-width: 1200px;
+   min-height: 264px;
+   margin-left: 340px;
+   padding-bottom: 24px;
+}
+div.column-right-s
+{
+   max-width: 1200px;
+   min-height: 206px;
+   margin-left: 340px;
+   padding-bottom: 24px;
+}
+div.footer
+{
+   text-align: center;
+   padding-bottom: 8px;
+}
+.poetry {
+   font-family: 'elvish-italic-italic';
+}
