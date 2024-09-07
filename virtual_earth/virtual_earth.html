@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>virtual_earth</title>
+    <title>The Earth</title>
     <style>
         body {
             display: flex;
@@ -216,6 +216,15 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
+        .help-text {
+            display: none;
+            position: fixed;
+            color: white;
+            bottom: 20px;
+            right: 200px;
+            z-index: 20;
+        }
+
         #browser-warning {
             display: none;
             color: #ffffff;
@@ -251,6 +260,7 @@
 <body>
     <canvas class="emscripten" id="canvas" tabindex="1"></canvas>
     <div class="container">
+        <!--
         <div class="card">
             <h1>Select Graphics API</h1>
             <div class="button-container">
@@ -261,17 +271,19 @@
                 <button class="samples" id="samples-button" onclick="window.location.href = 'http://diligentgraphics.github.io/';">Sample Gallery</button>
             </div>
         </div>
+        -->
         <div class="loading-indicator" id="loading-indicator">
             <div class="spinner"></div>
             <div class="progress-text" id="progress-text">0%</div>
         </div>
         <div id="browser-warning">
-            The application may not run properly on this browser. For best results, we recommend using Chrome.
+            The application may not run properly on this browser. For best results, we recommend using newest Chrome/Edge.
         </div>
-        <button id="back-button" class="back-button" style="display: none;" onclick="goBack()">Return to Menu</button>
+        <button id="back-button" class="back-button" style="display: none;" onclick="goBack()">Return to Home</button>
+        <div id="help-text" class="help-text">Rotate: Left Button, Pan: Ctrl + Left Button, Zoom: Mouse Wheel</div>
     </div>
 
-    <script src="coi-serviceworker.js"></script>
+    
     <script type='text/javascript'>
         function detectBrowser() {
             var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
@@ -283,7 +295,8 @@
         function checkWebGPUSupport() {
             const webgpuButton = document.getElementById('webgpu-button');
             if (!navigator.gpu) {
-                webgpuButton.disabled = true;
+                /* webgpuButton.disabled = true; */
+                document.getElementById('browser-warning').style.display = 'block';
             }
         }
 
@@ -342,13 +355,7 @@
                 console.error(text);
             },
             canvas: (function () {
-                var dpr = window.devicePixelRatio;
                 var canvas = document.getElementById('canvas');
-            
-                window.onload =  function () {
-                    canvas.width = Math.ceil(dpr * window.innerWidth);
-                    canvas.height = Math.ceil(dpr * window.innerHeight);
-                };
                 canvas.addEventListener("webglcontextlost", function(e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
                 return canvas;
             })(),
@@ -361,6 +368,7 @@
                         document.getElementById('loading-indicator').style.display = 'none';
                         document.getElementById('canvas').style.display = 'flex';
                         document.getElementById('back-button').style.display = 'block';
+                        document.getElementById('help-text').style.display = 'block';
                     }, 100); // Delay before hiding the indicator
                 } else {
                     progressText.textContent = percentage.toString() + '%';
@@ -373,15 +381,27 @@
         };
            
         detectBrowser();
-        checkWebGPUSupport()
+        checkWebGPUSupport();
 
         window.onerror = function () {
             console.log("onerror: " + event);
         };
 
+        window.onload = function () {
+            var canvas = document.getElementById('canvas');            
+            var dpr = window.devicePixelRatio;
+            canvas.width = Math.ceil(dpr * window.innerWidth);
+            canvas.height = Math.ceil(dpr * window.innerHeight);
+            canvas.focus();
+
+            if (navigator.gpu) {
+                loadWasm('wgpu');
+            }
+        };
+
         function loadWasm(api) {
             // Hide the card and show the loading indicator
-            document.querySelector('.card').style.display = 'none';
+            // document.querySelector('.card').style.display = 'none';
             document.getElementById('loading-indicator').style.display = 'flex';
             document.getElementById('browser-warning').style.display = 'none'; 
 
@@ -400,7 +420,7 @@
 
         function goBack() {
             // Reload the page to go back to the menu
-            location.reload();
+            location.goBack();
         }
 
     </script>
