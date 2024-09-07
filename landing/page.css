@@ -6,9 +6,16 @@ body
 {
    font-family: Segoe UI Light, Tahoma, Arial, Helvetica;
    color: #eee;
-	background: #333;
-	/* background-image: url("images/stone.jpg"); */
+   background: linear-gradient(177deg, #3a3a3a, #303e3d, #22223a);
+   background-size: 180% 180%;
+   animation: gradient-animation 15s ease infinite;
 }
+@keyframes gradient-animation {
+   0% { background-position: 0% 50%; }
+   50% { background-position: 100% 50%; }
+   100% { background-position: 0% 50%; }
+}
+
 p.title, div.title
 {
    padding: 1.5em;
