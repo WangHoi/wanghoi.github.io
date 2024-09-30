@@ -67,6 +67,10 @@ jobs:
         with:
           name: fft_ocean_pages
           path: fft-ocean/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: midi_player_pages
+          path: midi_player/
   # Single deploy job since we're just deploying
   deploy:
     needs: build
@@ -79,7 +83,14 @@ jobs:
         run: |
           mkdir -p virtual_earth
           mkdir -p fft-ocean
+          mkdir -p midi_player
           mkdir -p kwui
+      - name: Download midi_player artifact
+        id: download-midi-player-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: midi_player_pages
+          path: midi_player/
       - name: Download virtual_earth artifact
         id: download-virtual-earth-artifact
         uses: actions/download-artifact@v4
