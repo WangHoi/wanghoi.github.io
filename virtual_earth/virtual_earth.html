@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +19,17 @@
         }
 
         @keyframes gradient-animation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .container {
@@ -54,8 +63,10 @@
         }
 
         .loading-indicator .spinner {
-            border: 8px solid rgba(255, 255, 255, 0.2); /* Light grey */
-            border-left: 8px solid #ffffff; /* White */
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            /* Light grey */
+            border-left: 8px solid #ffffff;
+            /* White */
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -64,8 +75,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-indicator .progress-text {
@@ -137,13 +153,14 @@
 
         button:disabled {
             background-color: #d3d3d3;
-            color: #808080; 
+            color: #808080;
             cursor: not-allowed;
             opacity: 0.6;
             border: 1px solid #c0c0c0;
         }
 
-        button:disabled:hover,  button:disabled:active {
+        button:disabled:hover,
+        button:disabled:active {
             background-color: #d3d3d3;
             transform: none;
             box-shadow: none;
@@ -202,7 +219,8 @@
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
-            z-index: 20; /* Ensure it stays on top */
+            z-index: 20;
+            /* Ensure it stays on top */
         }
 
         .back-button:hover {
@@ -245,8 +263,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         #browser-warning::before {
@@ -257,6 +280,7 @@
         }
     </style>
 </head>
+
 <body>
     <canvas class="emscripten" id="canvas" tabindex="1"></canvas>
     <div class="container">
@@ -277,7 +301,8 @@
             <div class="progress-text" id="progress-text">0%</div>
         </div>
         <div id="browser-warning">
-            The application may not run properly on this browser. For best results, we recommend using newest Chrome/Edge.
+            The application may not run properly on this browser. For best results, we recommend using newest
+            Chrome/Edge.
         </div>
         <button id="back-button" class="back-button" style="display: none;" onclick="goBack()">Return to Home</button>
         <div id="help-text" class="help-text">Rotate: Left Button, Pan: Ctrl + Left Button, Zoom: Mouse Wheel</div>
@@ -329,7 +354,7 @@
             if (match) {
                 var numerator = parseInt(match[1], 10);
                 var denominator = parseInt(match[2], 10);
-        
+
                 var result = numerator / denominator;
                 return Math.floor(100.0 * result);
             } else {
@@ -339,7 +364,7 @@
 
         var Module = {
             preRun: [],
-            postRun: function() {
+            postRun: function () {
                 var canvas = document.getElementById('canvas');
                 if (canvas)
                     canvas.focus();
@@ -356,11 +381,11 @@
             },
             canvas: (function () {
                 var canvas = document.getElementById('canvas');
-                canvas.addEventListener("webglcontextlost", function(e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
+                canvas.addEventListener("webglcontextlost", function (e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
                 return canvas;
             })(),
             setStatus: function (text) {
-                const progressText =  document.getElementById('progress-text');
+                const progressText = document.getElementById('progress-text');
                 const percentage = extractLoadingStatus(text)
                 if (percentage >= 100) {
                     progressText.textContent = 'Completed';
@@ -379,7 +404,7 @@
                 // no run dependencies to log
             }
         };
-           
+
         detectBrowser();
         checkWebGPUSupport();
 
@@ -388,7 +413,7 @@
         };
 
         window.onload = function () {
-            var canvas = document.getElementById('canvas');            
+            var canvas = document.getElementById('canvas');
             var dpr = window.devicePixelRatio;
             canvas.width = Math.ceil(dpr * window.innerWidth);
             canvas.height = Math.ceil(dpr * window.innerHeight);
@@ -403,19 +428,21 @@
             // Hide the card and show the loading indicator
             // document.querySelector('.card').style.display = 'none';
             document.getElementById('loading-indicator').style.display = 'flex';
-            document.getElementById('browser-warning').style.display = 'none'; 
+            document.getElementById('browser-warning').style.display = 'none';
 
             Module.arguments = ["--mode", `${api}`];
             if (api === 'wgpu') {
-                initWebGPUDevice.then(device => { Module.preinitializedWebGPUDevice = device });
+                initWebGPUDevice
+                    .then(device => { Module.preinitializedWebGPUDevice = device })
+                    .then(() => {
+                        const script = document.createElement('script');
+                        script.src = 'midi_player.js';
+                        document.body.appendChild(script);
+                        document.addEventListener("contextmenu", function (event) {
+                            event.preventDefault();
+                        });
+                    });
             }
-         
-            const script = document.createElement('script');
-            script.src = 'virtual_earth.js';
-            document.body.appendChild(script);
-            document.addEventListener("contextmenu", function (event) {
-                event.preventDefault();
-            });
         }
 
         function goBack() {
@@ -425,4 +452,5 @@
 
     </script>
 </body>
+
 </html>
