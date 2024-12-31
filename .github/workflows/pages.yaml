@@ -75,7 +75,11 @@ jobs:
         with:
           name: sichuan_map_pages
           path: sichuan_map/
-  # Single deploy job since we're just deploying
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cozy_bakery_pages
+          path: cozy_bakery/
+    # Single deploy job since we're just deploying
   deploy:
     needs: build
     environment:
@@ -113,6 +117,12 @@ jobs:
         with:
           name: sichuan_map_pages
           path: sichuan_map/
+      - name: Download cozy_bakery artifact
+        id: download-cozy_bakery-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cozy_bakery_pages
+          path: cozy_bakery/
       - name: Download kwui mdbook artifact
         id: download-kwui-book-artifact
         uses: actions/download-artifact@v4

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melia Runner</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(177deg, #3a3a3a, #303e3d, #22223a);
+            background-size: 180% 180%;
+            animation: gradient-animation 15s ease infinite;
+        }
+
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 30px 40px;
+            text-align: center;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .loading-indicator {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-indicator .spinner {
+            /* Light grey */
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            /* White */
+            border-left: 8px solid #ffffff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: relative;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-indicator .progress-text {
+            font-size: 20px;
+            color: white;
+            margin-top: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .samples-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        button.webgl {
+            background: #7289da;
+        }
+
+        button.webgl:hover {
+            background: #5b6eae;
+            transform: scale(1.05);
+        }
+
+        button.webgl:active {
+            background: #4752c4;
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button.webgpu {
+            background: #43b581;
+        }
+
+        button.webgpu:hover {
+            background: #3a9d6e;
+            transform: scale(1.05);
+        }
+
+        button.webgpu:active {
+            background: #2d8c5a;
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background-color: #d3d3d3;
+            color: #808080;
+            cursor: not-allowed;
+            opacity: 0.6;
+            border: 1px solid #c0c0c0;
+        }
+
+        button:disabled:hover,
+        button:disabled:active {
+            background-color: #d3d3d3;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button.samples {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1295f3;
+            margin-top: 50px;
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+
+        button.samples:hover {
+            background: #2284e6;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        button.samples:active {
+            background: #0074d3;
+            transform: translate(-50%, -50%)scale(0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .emscripten {
+            display: none;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            margin: 0px;
+            border: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: block;
+            image-rendering: optimizeSpeed;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        .back-button {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+            /* Ensure it stays on top */
+            z-index: 20;
+        }
+
+        .back-button:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .back-button:active {
+            background: #1e6b99;
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .help-text {
+            display: none;
+            position: fixed;
+            color: white;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            background: #e0e0e040;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .help-text-group {
+            display: block;
+            height: 44px;
+            line-height: 0px;
+        }
+
+        .help-text-img {
+            vertical-align: bottom;
+        }
+
+        .help-text-label {
+            display: inline-block;
+            margin: 0px 0px 0px 10px;
+            vertical-align: bottom;
+            line-height: 44px;
+        }
+
+        #browser-warning {
+            display: none;
+            color: #ffffff;
+            background-color: rgba(255, 69, 0, 0.8);
+            border: 2px solid #ff4500;
+            border-radius: 10px;
+            padding: 15px 20px 15px 35px;
+            text-align: center;
+            margin: 20px auto;
+            width: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: absolute;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #browser-warning::before {
+            content: '⚠️';
+            font-size: 1.5em;
+            position: absolute;
+            left: 15px;
+        }
+
+        .bakery-img {
+            position: fixed;
+            display: none;
+            width: 20%;
+            max-width: 200px;
+            bottom: 82px;
+            right: 20px;
+            border-radius: 5px;
+            /* mix-blend-mode: hard-light; */
+            box-shadow: #0008 0px 4px 8px;
+            transform-origin: bottom right;
+            transition-duration: 0.3s;
+            transition-timing-function: ease;
+        }
+
+        .bakery-img:hover {
+            cursor: pointer;
+            transform: scale(1.2);
+            /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+    </style>
+</head>
+
+<body>
+    <canvas class="emscripten" id="canvas" tabindex="1">
+    </canvas>
+    <div class="container">
+        <div class="loading-indicator" id="loading-indicator">
+            <div class="spinner"></div>
+            <div class="progress-text" id="progress-text">0%</div>
+        </div>
+        <img id="bakery-img" class="bakery-img" src="./blender_35_splash_nicole_morena.jpg" alt="bakery"
+            onclick="window.open('https://cara.app/nickyblender')" />
+        <div id="browser-warning">
+            The application may not run properly on this browser. For best results, we recommend using newest
+            Chrome/Edge.
+        </div>
+        <button id="back-button" class="back-button" style="display: none;" onclick="goBack()">Return to Home</button>
+        <div id="help-text" class="help-text">
+            <div id="help-text-group" class="help-text-group">
+                <img id="help-text-img" class="help-text-img" src="./zoom_button.svg" alt="zoom" />
+                <p id="help-text-label" class="help-text-label">Zoom</p>
+            </div>
+            <div id="help-text-group" class="help-text-group">
+                <img id="help-text-img" class="help-text-img" src="./rotate_button.svg" alt="rotate" />
+                <p id="help-text-label" class="help-text-label">Rotate</p>
+            </div>
+            <div id="help-text-group" class="help-text-group">
+                <img id="help-text-img" class="help-text-img" src="./pan_button.svg" alt="pan" />
+                <p id="help-text-label" class="help-text-label">Pan</p>
+            </div>
+        </div>
+    </div>
+
+    
+    <script type='text/javascript'>
+        function detectBrowser() {
+            var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            if (!isChrome) {
+                document.getElementById('browser-warning').style.display = 'block';
+            }
+        }
+
+        function checkWebGPUSupport() {
+            const webgpuButton = document.getElementById('webgpu-button');
+            if (!navigator.gpu) {
+                /* webgpuButton.disabled = true; */
+                document.getElementById('browser-warning').style.display = 'block';
+            }
+        }
+
+        var initWebGPUDevice = (async () => {
+            const requiredFeatures = [
+                "depth-clip-control",
+                "depth32float-stencil8",
+                "texture-compression-bc",
+                "indirect-first-instance",
+                "shader-f16",
+                "rg11b10ufloat-renderable",
+                "bgra8unorm-storage",
+                "float32-filterable",
+                "unorm16-texture-formats",
+                "snorm16-texture-formats",
+            ];
+
+            const adapter = await navigator.gpu.requestAdapter();
+            const device = await adapter.requestDevice({
+                requiredFeatures: requiredFeatures.filter(feature => adapter.features.has(feature)),
+                requiredLimits: {
+                    maxColorAttachmentBytesPerSample: adapter.limits.maxColorAttachmentBytesPerSample
+                }
+            });
+            return device;
+        })();
+
+        function extractLoadingStatus(input) {
+            var match = input.match(/\(([\d.]+).*\/([\d.]+).*\)/);
+            if (match) {
+                var numerator = parseFloat(match[1], 10);
+                var denominator = parseFloat(match[2], 10);
+
+                var result = numerator / denominator;
+                return Math.floor(100.0 * result);
+            } else {
+                return 100;
+            }
+        }
+
+        var Module = {
+            preRun: [],
+            postRun: function() {
+                var canvas = document.getElementById('canvas');
+                if (canvas)
+                    canvas.focus();
+            },
+            print: (function () {
+                return function (text) {
+                    text = Array.prototype.slice.call(arguments).join(' ');
+                    console.log(text);
+                };
+            })(),
+            printErr: function (text) {
+                text = Array.prototype.slice.call(arguments).join(' ');
+                console.error(text);
+            },
+            canvas: (function () {
+                var canvas = document.getElementById('canvas');
+                canvas.addEventListener("webglcontextlost", function (e) { alert('FIXME: WebGL context lost, please reload the page'); e.preventDefault(); }, false);
+                return canvas;
+            })(),
+            setStatus: function (text, opt_progress) {
+                const progressText = document.getElementById('progress-text');
+                // const percentage = extractLoadingStatus(text)
+                const percentage = typeof opt_progress == "number" ? opt_progress : 100;
+                if (percentage >= 100) {
+                    progressText.textContent = 'Initializing...';
+                    /*
+                    setTimeout(() => {
+                        document.getElementById('loading-indicator').style.display = 'none';
+                        document.getElementById('canvas').style.display = 'flex';
+                        document.getElementById('back-button').style.display = 'block';
+                        document.getElementById('help-text').style.display = 'block';
+                    }, 100); // Delay before hiding the indicator
+                    */
+                } else {
+                    progressText.textContent = percentage.toString() + '%';
+                }
+                console.log("status: " + text);
+            },
+            monitorRunDependencies: function (left) {
+                // no run dependencies to log
+            },
+            getPreloadedPackage: (remotePackageName, remotePackageSize) => {
+                // console.log(`Runtime asking for remote package ${remotePackageName}, expected size ${remotePackageSize} bytes.`);
+                return Module['downloadedData'];
+            }
+        };
+
+        detectBrowser();
+        checkWebGPUSupport();
+
+        window.onerror = function () {
+            console.log("onerror: " + event);
+        };
+
+        window.onload = function () {
+            var canvas = document.getElementById('canvas');
+            var dpr = window.devicePixelRatio;
+            canvas.width = Math.ceil(dpr * window.innerWidth);
+            canvas.height = Math.ceil(dpr * window.innerHeight);
+            canvas.focus();
+
+            document.addEventListener("app-ready", () => {
+                document.getElementById('progress-text').textContent = "Completed";
+                setTimeout(() => {
+                    document.getElementById('loading-indicator').style.display = 'none';
+                    document.getElementById('canvas').style.display = 'flex';
+                    document.getElementById('back-button').style.display = 'block';
+                    document.getElementById('help-text').style.display = 'block';
+                    document.getElementById('bakery-img').style.display = 'block';
+                }, 100); // Delay before hiding the indicator
+            });
+            if (navigator.gpu) {
+                loadWasm('wgpu');
+            }
+        };
+
+        function mergeArrayBuffers(arrays) {
+            const totalSize = arrays.reduce((acc, e) => acc + e.byteLength, 0);
+            const merged = new Uint8Array(totalSize);
+
+            arrays.forEach((array, i, arrays) => {
+                const offset = arrays.slice(0, i).reduce((acc, e) => acc + e.byteLength, 0);
+                merged.set(new Uint8Array(array), offset);
+            });
+
+            return merged.buffer;
+        }
+
+        /**
+         * Format bytes as human-readable text.
+         * 
+         * @param bytes Number of bytes.
+         * @param si True to use metric (SI) units, aka powers of 1000. False to use 
+         *           binary (IEC), aka powers of 1024.
+         * @param dp Number of decimal places to display.
+         * 
+         * @return Formatted string.
+         */
+        function humanFileSize(bytes, si = false, dp = 1) {
+            const thresh = si ? 1000 : 1024;
+
+            if (Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+
+            const units = si
+                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            let u = -1;
+            const r = 10 ** dp;
+
+            do {
+                bytes /= thresh;
+                ++u;
+            } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+            return bytes.toFixed(dp) + ' ' + units[u];
+        }
+
+        function fetchRemotePackage(packageName, packageSize, callback, errback) {
+            var xhr = new XMLHttpRequest;
+            xhr.open("GET", packageName, true);
+            xhr.responseType = "arraybuffer";
+            xhr.onprogress = event => {
+                var url = packageName;
+                var size = packageSize;
+                if (event.total) size = event.total;
+                if (event.loaded) {
+                    Module["dataFileDownloads"][url].loaded = event.loaded;
+                    var total = 0;
+                    var loaded = 0;
+                    var num = 0;
+                    for (var download in Module["dataFileDownloads"]) {
+                        var data = Module["dataFileDownloads"][download];
+                        total += data.total;
+                        loaded += data.loaded;
+                        num++;
+                    }
+                    Module["setStatus"]?.(`Downloading data... (${humanFileSize(loaded)}/${humanFileSize(total)})`, Math.floor(100.0 * loaded / total));
+                } else if (!Module["dataFileDownloads"]) {
+                    Module["setStatus"]?.("Downloading data...");
+                }
+            };
+            xhr.onerror = event => {
+                throw new Error("NetworkError for: " + packageName);
+            };
+            xhr.onload = event => {
+                if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) {
+                    // file URLs can return 0
+                    var packageData = xhr.response;
+                    callback(packageData);
+                } else {
+                    throw new Error(xhr.statusText + " : " + xhr.responseURL);
+                }
+            };
+            xhr.send(null);
+        }
+
+
+        function loadWasm(api) {
+            // Hide the card and show the loading indicator
+            // document.querySelector('.card').style.display = 'none';
+            document.getElementById('loading-indicator').style.display = 'flex';
+            document.getElementById('browser-warning').style.display = 'none';
+
+            Module.arguments = ["--mode", `${api}`];
+            if (api === 'wgpu') {
+                initWebGPUDevice.then(device => { Module.preinitializedWebGPUDevice = device });
+            }
+
+            // Download data file
+            const REMOTE_PACKAGE_NAME = 'melia_runner.data';
+            const REMOTE_PACKAGE_SIZE = 108963304;
+            const CHUNK_SIZE = 52428800;
+
+            Module["dataFileDownloads"] = {};
+            var file_list = [];
+            var file_contents = [];
+            var file_idx = 0;
+            {
+                i = 0;
+                n = REMOTE_PACKAGE_SIZE;
+                while (n > 0) {
+                    var chunkSize = Math.min(n, CHUNK_SIZE);
+                    var suffix = `${i}`.padStart(3, 0);
+                    var url = `${REMOTE_PACKAGE_NAME}.${suffix}`;
+                    file_list.push(url);
+                    Module["dataFileDownloads"][url] = {
+                        loaded: 0,
+                        total: chunkSize
+                    };
+                    n -= chunkSize;
+                    i++;
+                }
+            }
+
+
+            download_next = () => {
+                var url = file_list[file_idx];
+                fetchRemotePackage(url, Module['dataFileDownloads'][url].total, (data) => {
+                    // console.log(`downloaded data file ${file_list[file_idx]}, length ${data.byteLength}`);
+                    file_contents.push(data);
+                    ++file_idx;
+
+                    if (file_idx >= file_list.length) {
+                        Module['downloadedData'] = mergeArrayBuffers(file_contents);
+
+                        // Add js file
+                        const script = document.createElement('script');
+                        script.src = 'melia_runner.js';
+                        document.body.appendChild(script);
+                        document.addEventListener("contextmenu", function (event) {
+                            event.preventDefault();
+                        });
+                    } else {
+                        download_next();
+                    }
+                }, (error) => {
+                    console.error("package error:", error);
+                });
+            };
+            download_next();
+        }
+
+        function goBack() {
+            // Reload the page to go back to the menu
+            window.location.href = "/";
+        }
+
+    </script>
+</body>
+</html>
