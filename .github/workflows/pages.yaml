@@ -79,6 +79,10 @@ jobs:
         with:
           name: cozy_bakery_pages
           path: cozy_bakery/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sponza_pages
+          path: sponza/
     # Single deploy job since we're just deploying
   deploy:
     needs: build
@@ -123,6 +127,12 @@ jobs:
         with:
           name: cozy_bakery_pages
           path: cozy_bakery/
+      - name: Download sponza artifact
+        id: download-sponza-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sponza_pages
+          path: sponza/
       - name: Download kwui mdbook artifact
         id: download-kwui-book-artifact
         uses: actions/download-artifact@v4
