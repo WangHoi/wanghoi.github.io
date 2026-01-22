@@ -400,7 +400,8 @@
             const device = await adapter.requestDevice({
                 requiredFeatures: requiredFeatures.filter(feature => adapter.features.has(feature)),
                 requiredLimits: {
-                    maxColorAttachmentBytesPerSample: adapter.limits.maxColorAttachmentBytesPerSample
+                    maxColorAttachmentBytesPerSample: adapter.limits.maxColorAttachmentBytesPerSample,
+                    maxBufferSize: adapter.limits.maxBufferSize
                 }
             });
             return device;
