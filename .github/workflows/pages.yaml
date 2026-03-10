@@ -83,6 +83,10 @@ jobs:
         with:
           name: sponza_pages
           path: sponza/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p25_pages
+          path: p25/
     # Single deploy job since we're just deploying
   deploy:
     needs: build
@@ -133,6 +137,12 @@ jobs:
         with:
           name: sponza_pages
           path: sponza/
+      - name: Download p25 artifact
+        id: download-p25-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: p25_pages
+          path: p25/
       - name: Download kwui mdbook artifact
         id: download-kwui-book-artifact
         uses: actions/download-artifact@v4
